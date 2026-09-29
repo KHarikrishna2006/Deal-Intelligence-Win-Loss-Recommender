@@ -1,0 +1,77 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-deal}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-deal}
+      POSTGRES_DB: ${POSTGRES_DB:-deal_intelligence}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-deal} -d ${POSTGRES_DB:-deal_intelligence}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  hindsight:
+    image: ghcr.io/vectorize-io/hindsight:latest
+    restart: unless-stopped
+    environment:
+      HINDSIGHT_API_LLM_PROVIDER: ollama
+      HINDSIGHT_API_LLM_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434/v1}
+      HINDSIGHT_API_LLM_MODEL: ${LLM_MODEL:-llama3.2:3b}
+      HINDSIGHT_API_LLM_TIMEOUT: "600"
+      HINDSIGHT_API_LLM_MAX_CONCURRENT: "1"
+      HINDSIGHT_API_RETAIN_MAX_COMPLETION_TOKENS: "3000"
+      HINDSIGHT_API_RETAIN_CHUNK_SIZE: "1500"
+      HINDSIGHT_API_RETAIN_WALL_TIMEOUT: "900"
+      HINDSIGHT_API_CONSOLIDATION_WALL_TIMEOUT: "900"
+      HINDSIGHT_API_ENABLE_AUTO_CONSOLIDATION: "false"
+      HINDSIGHT_API_SKIP_LLM_VERIFICATION: "true"
+      HINDSIGHT_API_WORKER_ID: deal-intelligence
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - hindsightdata:/home/hindsight/.pg0
+    ports:
+      - "${HINDSIGHT_PORT:-8889}:8888"
+      - "${HINDSIGHT_CP_PORT:-9999}:9999"
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      ENVIRONMENT: production
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-deal}:${POSTGRES_PASSWORD:-deal}@postgres:5432/${POSTGRES_DB:-deal_intelligence}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,http://localhost:5173}
+      LLM_BASE_URL: ${LLM_BASE_URL:-http://host.docker.internal:11434/v1}
+      LLM_MODEL: ${LLM_MODEL:-llama3.2:3b}
+      HINDSIGHT_URL: http://hindsight:8888
+      HINDSIGHT_ENABLED: ${HINDSIGHT_ENABLED:-true}
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
+      SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:-demo-password-123}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      hindsight:
+        condition: service_started
+    ports:
+      - "${API_PORT:-8001}:8000"
+
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "${WEB_PORT:-8080}:80"
+
+volumes:
+  pgdata:
+  hindsightdata:

@@ -1,0 +1,94 @@
+from __future__ import annotations
+
+import enum
+
+
+class Role(str, enum.Enum):
+    ADMIN = "ADMIN"
+    SALES_MANAGER = "SALES_MANAGER"
+    SALES_REP = "SALES_REP"
+
+
+class DealStage(str, enum.Enum):
+    LEAD = "LEAD"
+    QUALIFICATION = "QUALIFICATION"
+    DISCOVERY = "DISCOVERY"
+    PROPOSAL = "PROPOSAL"
+    NEGOTIATION = "NEGOTIATION"
+    CLOSED_WON = "CLOSED_WON"
+    CLOSED_LOST = "CLOSED_LOST"
+
+
+class DealStatus(str, enum.Enum):
+    OPEN = "OPEN"
+    CLOSED = "CLOSED"
+    ARCHIVED = "ARCHIVED"
+
+
+class DealOutcome(str, enum.Enum):
+    WON = "WON"
+    LOST = "LOST"
+
+
+class InteractionType(str, enum.Enum):
+    CALL = "CALL"
+    MEETING = "MEETING"
+    EMAIL = "EMAIL"
+    NOTE = "NOTE"
+    PROPOSAL = "PROPOSAL"
+    PRICING_DISCUSSION = "PRICING_DISCUSSION"
+    OBJECTION = "OBJECTION"
+    COMPETITOR_DISCUSSION = "COMPETITOR_DISCUSSION"
+    TRANSCRIPT = "TRANSCRIPT"
+
+
+class DealEventType(str, enum.Enum):
+    STAGE_CHANGED = "STAGE_CHANGED"
+    INTERACTION_ADDED = "INTERACTION_ADDED"
+    COMPETITOR_ADDED = "COMPETITOR_ADDED"
+    OBJECTION_ADDED = "OBJECTION_ADDED"
+    OUTCOME_RECORDED = "OUTCOME_RECORDED"
+    RECOMMENDATION_GENERATED = "RECOMMENDATION_GENERATED"
+    MEMORY_RETAINED = "MEMORY_RETAINED"
+    DEAL_CREATED = "DEAL_CREATED"
+    DEAL_UPDATED = "DEAL_UPDATED"
+
+
+class RecommendationKind(str, enum.Enum):
+    NEXT_ACTION = "NEXT_ACTION"
+    RISK = "RISK"
+    INSIGHT = "INSIGHT"
+
+
+class EvidenceLevel(str, enum.Enum):
+    EVIDENCE_BASED = "EVIDENCE_BASED"
+    LIMITED_EVIDENCE = "LIMITED_EVIDENCE"
+    INSUFFICIENT_DATA = "INSUFFICIENT_DATA"
+
+
+class RecommendationSource(str, enum.Enum):
+    LLM = "LLM"
+    DETERMINISTIC = "DETERMINISTIC"
+
+
+class FeedbackType(str, enum.Enum):
+    USEFUL = "USEFUL"
+    NOT_USEFUL = "NOT_USEFUL"
+    ACTED_ON = "ACTED_ON"
+    IGNORED = "IGNORED"
+
+
+class RiskLevel(str, enum.Enum):
+    HIGH = "HIGH"
+    MEDIUM = "MEDIUM"
+    LOW = "LOW"
+
+
+class MemoryKind(str, enum.Enum):
+    INTERACTION = "INTERACTION"
+    OUTCOME = "OUTCOME"
+    DEAL_CONTEXT = "DEAL_CONTEXT"
+    OBJECTION = "OBJECTION"
+    COMPETITOR = "COMPETITOR"
+    PRICING = "PRICING"
+    CUSTOMER = "CUSTOMER"
